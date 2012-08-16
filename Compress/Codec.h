@@ -1,6 +1,8 @@
 #ifndef D_CODEC_H
 #define D_CODEC_H
 
+#include <cstring>		// size_t
+
 class BitReader;
 class BitWriter;
 

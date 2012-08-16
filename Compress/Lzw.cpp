@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Lzw.h"
 #include "BitIO.h"
 

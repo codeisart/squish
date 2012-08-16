@@ -1,7 +1,6 @@
 // Compress.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include "BasicTypes.h"
 #include "BitIO.h"
 #include "Codec.h"
@@ -627,7 +626,11 @@ bool runTests()
 	return success;
 }
 
+#ifdef _MSC_VER
 int _tmain(int argc, _TCHAR* argv[])
+#else 
+int main(int, char** argv)
+#endif 
 {
 	runTests();
 	return 0;

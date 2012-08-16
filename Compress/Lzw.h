@@ -1,6 +1,8 @@
 #ifndef D_LZW_H
 #define D_LZW_H
 
+#include "BasicTypes.h"
+#include "CompilerExtras.h"
 #include "Codec.h"
 #include <exception>
 
@@ -17,7 +19,7 @@ protected:
 
 	virtual size_t decode( BitReader& src, BitWriter& dst ) 
 	{
-		throw std::exception("The method or operation is not implemented.");
+		//throw std::exception("The method or operation is not implemented.");
 	}
 
 private:

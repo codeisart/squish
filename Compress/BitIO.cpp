@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "BitIO.h"
 #include "BasicTypes.h"
 
