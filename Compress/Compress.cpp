@@ -527,8 +527,6 @@ bool test15()
 	std::cout << "Test 15 - Compress LZW example strings from Mark Nelson" << std::endl;
 	
 	bool success = true;
-	
-	
 
 	const char* text = "/WED/WE/WEE/WEB/WET";
 	u32 expectedOut[] = { '/','W','E','D',256,'E',260,261,257,'B',260,'T' };
@@ -590,6 +588,46 @@ bool test16()
 	return success;
 }
 
+bool test17()
+{
+	std::cout << "Test 17 Decompress LZW example strings from Mark Nelson" << std::endl;
+	
+	bool success = true;
+
+	const char* text = "/WED/WE/WEE/WEB/WET";
+	u32 expectedOut[] = { '/','W','E','D',256,'E',260,261,257,'B',260,'T' };
+	size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
+	
+	{
+		Codec* codec = new Lzw();
+		BitReader r(text, strlen(text));
+		BitWriter w("../Compress/Tests/Lzw.out");
+		codec->encode(r,w);
+		delete codec;
+	}
+
+
+	{
+		Codec* codec = new Lzw();
+		BitReader r("../Compress/Tests/Lzw.out");
+		BitWriter w("../Compress/Tests/Lzw.txt");
+		codec->decode(r,w);
+		delete codec;
+	}
+	{
+		BitReader r("../Compress/Tests/Lzw.txt");
+		char c;
+		int i = 0;
+		while(r.readBits(&c,8))
+		{
+			if(c != text[i])
+				std::cout << "Expecting " << text[i] << ", but read " << c << std::endl;
+			i++;
+		}	
+	}
+
+	return success;
+}
 
 bool runTests()
 {
@@ -613,6 +651,7 @@ bool runTests()
 		success &= test14();
 		success &= test15();
 		success &= test16();
+		success &= test17();
 	}
 	catch (std::bad_alloc* e)
 	{

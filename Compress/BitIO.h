@@ -2,6 +2,7 @@
 #define D_BITIO_H
 
 #include <fstream>
+#include <string>
 #include "Util.h"
 #include "BasicTypes.h"
 
@@ -43,6 +44,15 @@ inline int BitWriter::writeBits(WordSize word, int nBitsWrite)
 			writeBuffer();
 	}
 	return i;
+}
+
+template<>
+inline int BitWriter::writeBits<std::string>(const std::string s, int)
+{
+	for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+		writeBits<char>(*i,8);
+
+	return 8 * s.size();
 }
 
 class BitReader

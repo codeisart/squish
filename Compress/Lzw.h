@@ -16,11 +16,7 @@ public:
 
 protected:
 	virtual size_t encode( BitReader& src, BitWriter& dst ) override;	
-
-	virtual size_t decode( BitReader& src, BitWriter& dst ) 
-	{
-		//throw std::exception("The method or operation is not implemented.");
-	}
+	virtual size_t decode( BitReader& src, BitWriter& dst ) override; 
 
 private:
 	enum { BitSize = 12, MaxDictSize = 1 << (BitSize+1), Mask = MaxDictSize-1, EndOfData = 256, FlushDictionary = 257, FirstCode = 256, HashingShift=BitSize-8, Available = ~0 };
