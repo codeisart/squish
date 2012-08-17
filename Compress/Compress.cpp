@@ -6,6 +6,7 @@
 #include "Codec.h"
 #include "Lzw.h"
 
+#include <memory>
 #include <iostream>
 #include <exception>
 
@@ -629,6 +630,37 @@ bool test17()
 	return success;
 }
 
+bool test18()
+{
+	std::cout << "Test 18 - Compress Alice in Wonderland and Read it back" << std::endl;
+	
+	std::unique_ptr<Codec> codec(new Lzw());
+	{
+		BitReader r("../Compress/Tests/alice.txt");
+		BitWriter w("../Compress/Tests/alice.out");
+		codec->encode(r,w);
+	}
+
+	{
+		BitReader r("../Compress/Tests/alice.out");
+		BitWriter w("../Compress/Tests/alice.txtout");
+		codec->decode(r,w);
+	}
+	{
+		BitReader r1("../Compress/Tests/alice.txt");
+		BitReader r2("../Compress/Tests/alice.txtout");
+		char c1,c2;
+		int i = 0;
+		while(r1.readBits(&c1,8) && r2.readBits(&c2,8))
+		{
+			if(c1 != c2)
+				std::cout << "Expecting " << c1 << ", but read " << c2 << std::endl;
+			i++;
+		}	
+	}
+
+	return true;
+}
 bool runTests()
 {
 	bool success = true;
@@ -652,6 +684,7 @@ bool runTests()
 		success &= test15();
 		success &= test16();
 		success &= test17();
+		success &= test18();
 	}
 	catch (std::bad_alloc* e)
 	{
