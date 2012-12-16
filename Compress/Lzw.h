@@ -14,12 +14,13 @@ class Lzw : public Codec
 public:
 	Lzw();
 
+	enum { EndOfData = 256, BumpBitSize, FlushDictionary, FirstCode};
 protected:
 	virtual size_t encode( BitReader& src, BitWriter& dst ) override;	
 	virtual size_t decode( BitReader& src, BitWriter& dst ) override; 
 
+	enum { BitSize = 12 };
 private:
-	enum { BitSize = 12, EndOfData = 256, BumpBitSize, FlushDictionary, FirstCode};
 };
 
 #endif //D_LZW_H

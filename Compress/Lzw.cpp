@@ -23,17 +23,21 @@ size_t Lzw::decode(BitReader& src, BitWriter& dst)
 
 	while(src.readBits(&code,bitSize) && code != EndOfData)
 	{
+		//if(nextCode > (1 << bitSize)-1)
+		if( code == BumpBitSize )
+		{
+			std::cout << "Decoder Bumping code size to " << (bitSize+1) << " Previous: " << previous << std::endl;
+			bitSize++;
+			continue;
+		}	
+
 		if(codes.find(code) == codes.end())
 			codes[code] = previous + previous[0];
 
 		dst.writeBits(codes[code],8);
 
 		if(previous.size())
-		{
 			codes[nextCode++] = previous + codes[code][0];
-			//if( nextCode <= (1 << bitSize) )
-			//	 bitSize++;
-		}
 
 		previous = codes[code];
 	}
@@ -64,8 +68,12 @@ size_t Lzw::encode(BitReader& src, BitWriter& dst)
 			dst.writeBits(codes[current],bitSize);
 			current = c;
 			
-			//if(nextCode <= 1 << bitSize)
-			//	bitSize++;	
+			if(nextCode > (1 << bitSize)-1)
+			{
+				std::cout << "Encoder Bumping code size to " << (bitSize+1) << " current:" << current << std::endl;
+				dst.writeBits(static_cast<u32>(BumpBitSize), bitSize);
+				bitSize++;
+			}	
 		}
 	}
 

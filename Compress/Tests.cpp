@@ -10,6 +10,19 @@
 #include <iostream>
 #include <exception>
 
+bool runTests();
+
+#ifdef _MSC_VER
+int _tmain(int argc, _TCHAR* argv[])
+#else 
+int main(int, char** argv)
+#endif 
+{
+	std::cout << argv[0] << std::endl;
+	bool pass = runTests();
+	return pass ? 0 : -1;
+}
+
 bool test1()
 {
 	std::cout << "Test 1 - BitReader read hello file one bit at a time until end." << std::endl;
@@ -17,7 +30,7 @@ bool test1()
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../Compress/Tests/hello.txt");
+	BitReader r("TestData/hello.txt");
 
 	bool success = true;
 	for( int strIndex = 0; strIndex < size; ++strIndex )
@@ -62,7 +75,7 @@ bool test2()
 
 	int size = strlen(helloStr);
 
-	BitReader r("../Compress/Tests/hello.txt");
+	BitReader r("TestData/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -104,7 +117,7 @@ bool test3()
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../Compress/Tests/hello.txt");
+	BitReader r("TestData/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -187,7 +200,7 @@ bool test5()
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../Compress/Tests/hello.txt");
+	BitReader r("TestData/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -238,7 +251,7 @@ bool test6()
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../Compress/Tests/hello.txt");
+	BitReader r("TestData/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -279,7 +292,7 @@ bool test7()
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../Compress/Tests/hello.txt");
+	BitReader r("TestData/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -331,7 +344,7 @@ bool test8()
 	int totalBits = 8 * size;
 
 	{
-		BitWriter w("../Compress/Tests/hello.out");
+		BitWriter w("TestData/hello.out");
 
 		for( int i = 0; i < totalBits; ++i)
 		{
@@ -343,7 +356,7 @@ bool test8()
 	}
 
 	{
-		BitReader r("../Compress/Tests/hello.out");
+		BitReader r("TestData/hello.out");
 
 		for( int i = 0; i < totalBits; ++i)
 		{
@@ -379,7 +392,7 @@ bool nBitsInAndOutHelloTest(int bitWordSize)
 	bool success = true;
 
 	{
-		BitWriter w("../Compress/Tests/hello.out");
+		BitWriter w("TestData/hello.out");
 
 		for( int i = 0; i < totalBits; i+=bitWordSize)
 		{
@@ -396,8 +409,8 @@ bool nBitsInAndOutHelloTest(int bitWordSize)
 	}
 
 	{
-		BitReader r1("../Compress/Tests/hello.out");
-		BitReader r2("../Compress/Tests/hello.txt");
+		BitReader r1("TestData/hello.out");
+		BitReader r2("TestData/hello.txt");
 
 		for( int i = 0; i < totalBits; i+=bitWordSize)
 		{
@@ -460,12 +473,12 @@ bool test13()
 	int bitCount = 666;
 
 	{
-		BitWriter w("../Compress/Tests/ones_666.dat");
+		BitWriter w("TestData/ones_666.dat");
 		for( int i = 0; i < bitCount; ++i )
 			w.writeBits(0x1,1);
 	}
 	{
-		BitReader r("../Compress/Tests/ones_666.dat");
+		BitReader r("TestData/ones_666.dat");
 		for( int i = 0; i < bitCount; ++i)
 		{
 			u32 word = 0;
@@ -523,6 +536,8 @@ bool test14()
 	return success;
 }
 
+#define ADJUST(n) (n-256+Lzw::FirstCode) 
+
 bool test15()
 {
 	std::cout << "Test 15 - Compress LZW example strings from Mark Nelson" << std::endl;
@@ -530,18 +545,19 @@ bool test15()
 	bool success = true;
 
 	const char* text = "/WED/WE/WEE/WEB/WET";
-	u32 expectedOut[] = { '/','W','E','D',256,'E',260,261,257,'B',260,'T' };
+	
+	u32 expectedOut[] = { '/','W','E','D',ADJUST(256),'E',ADJUST(260),ADJUST(261),ADJUST(257),'B',ADJUST(260),'T', Lzw::EndOfData };
 	size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
 	
 	{
 		Codec* codec = new Lzw();
 		BitReader r(text, strlen(text));
-		BitWriter w("../Compress/Tests/Lzw.out");
+		BitWriter w("TestData/Lzw.out");
 		codec->encode(r,w);
 		delete codec;
 	}
 
-	BitReader r("../Compress/Tests/Lzw.out");
+	BitReader r("TestData/Lzw.out");
 	u32 word = 0;
 	int expectedIndex = 0;
 	while( int bitsRead = r.readBits(&word,12) )
@@ -558,9 +574,12 @@ bool test15()
 			std::cout << 
 				"\t" <<
 				"Expected to read " << expectedOut[expectedIndex] << 
-				" but read "  << word << std::endl;	
+				" but read "  << word << 
+				" at index " << expectedIndex << std::endl;	
 			success = false;
 		}
+		if( expectedOut[expectedIndex] == Lzw::EndOfData )
+			break;
 		expectedIndex++;
 	}
 
@@ -572,7 +591,7 @@ bool test16()
 {
 	std::cout << "Test 16 - BitReader Test that we return the correct number of bits read" << std::endl;
 
-	BitReader r("../Compress/Tests/hello.txt");
+	BitReader r("TestData/hello.txt");
 	
 	bool success = true;
 	u32 word = 0;
@@ -602,7 +621,7 @@ bool test17()
 	{
 		Codec* codec = new Lzw();
 		BitReader r(text, strlen(text));
-		BitWriter w("../Compress/Tests/Lzw.out");
+		BitWriter w("TestData/Lzw.out");
 		codec->encode(r,w);
 		delete codec;
 	}
@@ -610,13 +629,13 @@ bool test17()
 
 	{
 		Codec* codec = new Lzw();
-		BitReader r("../Compress/Tests/Lzw.out");
-		BitWriter w("../Compress/Tests/Lzw.txt");
+		BitReader r("TestData/Lzw.out");
+		BitWriter w("TestData/Lzw.txt");
 		codec->decode(r,w);
 		delete codec;
 	}
 	{
-		BitReader r("../Compress/Tests/Lzw.txt");
+		BitReader r("TestData/Lzw.txt");
 		char c;
 		int i = 0;
 		while(r.readBits(&c,8))
@@ -633,34 +652,39 @@ bool test17()
 bool test18()
 {
 	std::cout << "Test 18 - Compress Alice in Wonderland and Read it back" << std::endl;
-	
+
+	int success = true;	
 	std::unique_ptr<Codec> codec(new Lzw());
 	{
-		BitReader r("../Compress/Tests/alice.txt");
-		BitWriter w("../Compress/Tests/alice.out");
+		BitReader r("TestData/alice.txt");
+		BitWriter w("TestData/alice.out");
 		codec->encode(r,w);
 	}
 
 	{
-		BitReader r("../Compress/Tests/alice.out");
-		BitWriter w("../Compress/Tests/alice.txtout");
+		BitReader r("TestData/alice.out");
+		BitWriter w("TestData/alice.txtout");
 		codec->decode(r,w);
 	}
 	{
-		BitReader r1("../Compress/Tests/alice.txt");
-		BitReader r2("../Compress/Tests/alice.txtout");
+		BitReader r1("TestData/alice.txt");
+		BitReader r2("TestData/alice.txtout");
 		char c1,c2;
 		int i = 0;
 		while(r1.readBits(&c1,8) && r2.readBits(&c2,8))
 		{
 			if(c1 != c2)
-				std::cout << "Expecting " << c1 << ", but read " << c2 << std::endl;
+			{
+				std::cout << "Expecting " << c1 << ", but read " << c2 << "@ index " << i << std::endl;
+				success=false;
+			}
 			i++;
 		}	
 	}
 
-	return true;
+	return success;
 }
+
 bool runTests()
 {
 	bool success = true;
@@ -696,15 +720,5 @@ bool runTests()
 	}
 	
 	return success;
-}
-
-#ifdef _MSC_VER
-int _tmain(int argc, _TCHAR* argv[])
-#else 
-int main(int, char** argv)
-#endif 
-{
-	runTests();
-	return 0;
 }
 
