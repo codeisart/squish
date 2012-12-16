@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define if tr1/unordered_map is present. */
+#undef HAVE_TR1_UNORDERED_MAP
+
 /* Name of package */
 #undef PACKAGE
 
