@@ -2,6 +2,7 @@
 #include "BitIO.h"
 #include "Codec.h"
 #include "Lzw.h"
+#include "config.h"
 
 #include <memory>
 #include <iostream>

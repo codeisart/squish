@@ -1,5 +1,6 @@
 #include "Lzw.h"
 #include "BitIO.h"
+
 #include <unordered_map>
 #include <string>
 #include <iostream>
@@ -23,10 +24,8 @@ size_t Lzw::decode(BitReader& src, BitWriter& dst)
 
 	while(src.readBits(&code,bitSize) && code != EndOfData)
 	{
-		//if(nextCode > (1 << bitSize)-1)
 		if( code == BumpBitSize )
 		{
-			std::cout << "Decoder Bumping code size to " << (bitSize+1) << " Previous: " << previous << std::endl;
 			bitSize++;
 			continue;
 		}	
@@ -70,7 +69,6 @@ size_t Lzw::encode(BitReader& src, BitWriter& dst)
 			
 			if(nextCode > (1 << bitSize)-1)
 			{
-				std::cout << "Encoder Bumping code size to " << (bitSize+1) << " current:" << current << std::endl;
 				dst.writeBits(static_cast<u32>(BumpBitSize), bitSize);
 				bitSize++;
 			}	
