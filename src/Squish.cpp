@@ -10,5 +10,12 @@
 
 int main(int argc, char** argv)
 {
+	//Lzw enc;
+	//BitWriter w;
+	//while(std::cin)
+	//{
+	//}
+
+
 	return 0;
 }

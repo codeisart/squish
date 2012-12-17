@@ -9,7 +9,7 @@ Lzw::Lzw()
 {
 }
 
-size_t Lzw::decode(BitReader& src, BitWriter& dst)
+size_t Lzw::decode(BitReader* src, BitWriter* dst)
 {
 	typedef std::unordered_map<u32,std::string> Codes;
 
@@ -22,7 +22,7 @@ size_t Lzw::decode(BitReader& src, BitWriter& dst)
 	for(u32 i = 0; i < 256; ++i)
 		codes[i] = std::string(1,(char)i);
 
-	while(src.readBits(&code,bitSize) && code != EndOfData)
+	while(src->readBits(&code,bitSize) && code != EndOfData)
 	{
 		if( code == BumpBitSize )
 		{
@@ -33,7 +33,7 @@ size_t Lzw::decode(BitReader& src, BitWriter& dst)
 		if(codes.find(code) == codes.end())
 			codes[code] = previous + previous[0];
 
-		dst.writeBits(codes[code],8);
+		dst->writeBits(codes[code],8);
 
 		if(previous.size())
 			codes[nextCode++] = previous + codes[code][0];
@@ -44,7 +44,7 @@ size_t Lzw::decode(BitReader& src, BitWriter& dst)
 	return 0;	// FIXME!
 }
 
-size_t Lzw::encode(BitReader& src, BitWriter& dst)
+size_t Lzw::encode(BitReader* src, BitWriter* dst)
 {
 	typedef std::unordered_map<std::string,u32> Codes;
 
@@ -57,26 +57,26 @@ size_t Lzw::encode(BitReader& src, BitWriter& dst)
 	for(u32 i = 0; i < 256; ++i)
 		codes[std::string(1,(char)i)] = i;
 
-	while(src.readBits(&c,8))
+	while(src->readBits(&c,8))
 	{
 		current += c;
 		if(codes.find(current) == codes.end())
 		{
 			codes[current] = nextCode++;
 			current.erase(current.size()-1);
-			dst.writeBits(codes[current],bitSize);
+			dst->writeBits(codes[current],bitSize);
 			current = c;
 			
 			if(nextCode > (1 << bitSize)-1)
 			{
-				dst.writeBits(static_cast<u32>(BumpBitSize), bitSize);
+				dst->writeBits(static_cast<u32>(BumpBitSize), bitSize);
 				bitSize++;
 			}	
 		}
 	}
 
-	dst.writeBits(codes[current],bitSize);
-	dst.writeBits(static_cast<u32>(EndOfData),bitSize);
+	dst->writeBits(codes[current],bitSize);
+	dst->writeBits(static_cast<u32>(EndOfData),bitSize);
 	
 	return 0;	// FIXME!
 }

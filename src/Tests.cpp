@@ -25,12 +25,12 @@ int main(int, char** argv)
 
 bool test1()
 {
-	std::cout << "Test 1 - BitReader read hello file one bit at a time until end." << std::endl;
+	std::cout << "Test 1 - BitFileReader read hello file one bit at a time until end." << std::endl;
 		
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../testdata/hello.txt");
+	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
 	for( int strIndex = 0; strIndex < size; ++strIndex )
@@ -62,7 +62,7 @@ bool test1()
 
 bool test2()
 {
-	std::cout << "Test 2 - BitReader read hello file 2 bits at a time until end." << std::endl;
+	std::cout << "Test 2 - BitFileReader read hello file 2 bits at a time until end." << std::endl;
 
 	const char* helloStr = "hello";
 	const u8 expectedOutput[] = 
@@ -75,7 +75,7 @@ bool test2()
 
 	int size = strlen(helloStr);
 
-	BitReader r("../testdata/hello.txt");
+	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -112,12 +112,12 @@ bool test2()
 
 bool test3()
 {
-	std::cout << "Test 3 - BitReader read hello file 3 bits at a time until the end" << std::endl;
+	std::cout << "Test 3 - BitFileReader read hello file 3 bits at a time until the end" << std::endl;
 
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../testdata/hello.txt");
+	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -153,12 +153,12 @@ bool test3()
 
 bool test4()
 {
-	std::cout << "Test 4 - BitReader read in memory 3 bits at a time. " << std::endl;
+	std::cout << "Test 4 - BitFileReader read in memory 3 bits at a time. " << std::endl;
 
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r(helloStr,size);
+	BitStringReader r(std::string(helloStr,helloStr+size));
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -195,12 +195,12 @@ bool test4()
 
 bool test5()
 {
-	std::cout << "Test 5 - BitReader read in hello text file 8 bits at a time. " << std::endl;
+	std::cout << "Test 5 - BitFileReader read in hello text file 8 bits at a time. " << std::endl;
 
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../testdata/hello.txt");
+	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -246,12 +246,12 @@ bool test5()
 
 bool test6()
 {
-	std::cout << "Test 6 - BitReader read in hello text file 12 bits at a time. " << std::endl;
+	std::cout << "Test 6 - BitFileReader read in hello text file 12 bits at a time. " << std::endl;
 
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../testdata/hello.txt");
+	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -287,12 +287,12 @@ bool test6()
 
 bool test7()
 {
-	std::cout << "Test 7 - BitReader read in hello text file 12 bits until EOF " << std::endl;
+	std::cout << "Test 7 - BitFileReader read in hello text file 12 bits until EOF " << std::endl;
 
 	const char* helloStr = "hello";
 	int size = strlen(helloStr);
 
-	BitReader r("../testdata/hello.txt");
+	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
 	int expectedIndex = 0;
@@ -335,7 +335,7 @@ bool test7()
 
 bool test8()
 {
-	std::cout << "Test 8 - BitWriter write hello 1 bit at a time into a text file, then using BitReader to read it back." << std::endl;
+	std::cout << "Test 8 - BitFileWriter write hello 1 bit at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	bool success = true;
 
@@ -344,7 +344,7 @@ bool test8()
 	int totalBits = 8 * size;
 
 	{
-		BitWriter w("../testdata/hello.out");
+		BitFileWriter w("../testdata/hello.out");
 
 		for( int i = 0; i < totalBits; ++i)
 		{
@@ -356,7 +356,7 @@ bool test8()
 	}
 
 	{
-		BitReader r("../testdata/hello.out");
+		BitFileReader r("../testdata/hello.out");
 
 		for( int i = 0; i < totalBits; ++i)
 		{
@@ -392,7 +392,7 @@ bool nBitsInAndOutHelloTest(int bitWordSize)
 	bool success = true;
 
 	{
-		BitWriter w("../testdata/hello.out");
+		BitFileWriter w("../testdata/hello.out");
 
 		for( int i = 0; i < totalBits; i+=bitWordSize)
 		{
@@ -409,8 +409,8 @@ bool nBitsInAndOutHelloTest(int bitWordSize)
 	}
 
 	{
-		BitReader r1("../testdata/hello.out");
-		BitReader r2("../testdata/hello.txt");
+		BitFileReader r1("../testdata/hello.out");
+		BitFileReader r2("../testdata/hello.txt");
 
 		for( int i = 0; i < totalBits; i+=bitWordSize)
 		{
@@ -436,21 +436,21 @@ bool nBitsInAndOutHelloTest(int bitWordSize)
 
 bool test9()
 {
-	std::cout << "Test 9 - BitWriter write hello 2 bits at a time into a text file, then using BitReader to read it back." << std::endl;
+	std::cout << "Test 9 - BitFileWriter write hello 2 bits at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	// Pass.
 	return nBitsInAndOutHelloTest(2);
 }
 bool test10()
 {
-	std::cout << "Test 10 - BitWriter write hello 3 bits at a time into a text file, then using BitReader to read it back." << std::endl;
+	std::cout << "Test 10 - BitFileWriter write hello 3 bits at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	// Pass.
 	return nBitsInAndOutHelloTest(3);
 }
 bool test11()
 {
-	std::cout << "Test 11 - BitWriter write hello 12 bits at a time into a text file, then using BitReader to read it back." << std::endl;
+	std::cout << "Test 11 - BitFileWriter write hello 12 bits at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	// Pass.
 	return nBitsInAndOutHelloTest(12);
@@ -458,7 +458,7 @@ bool test11()
 
 bool test12()
 {
-	std::cout << "Test 12 - BitWriter write hello 8 bits at a time into a text file, then using BitReader to read it back." << std::endl;
+	std::cout << "Test 12 - BitFileWriter write hello 8 bits at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	// Pass.
 	return nBitsInAndOutHelloTest(8);
@@ -466,19 +466,19 @@ bool test12()
 
 bool test13()
 {
-	std::cout << "Test 13 - BitWriter write 1 666 times into a file, then use BitReader to read it back." << std::endl;
+	std::cout << "Test 13 - BitFileWriter write 1 666 times into a file, then use BitFileReader to read it back." << std::endl;
 	
 	bool success = true;
 	
 	int bitCount = 666;
 
 	{
-		BitWriter w("../testdata/ones_666.dat");
+		BitFileWriter w("../testdata/ones_666.dat");
 		for( int i = 0; i < bitCount; ++i )
 			w.writeBits(0x1,1);
 	}
 	{
-		BitReader r("../testdata/ones_666.dat");
+		BitFileReader r("../testdata/ones_666.dat");
 		for( int i = 0; i < bitCount; ++i)
 		{
 			u32 word = 0;
@@ -501,21 +501,21 @@ bool test13()
 
 bool test14()
 {
-	std::cout << "Test 14 - BitWriter write 1 666 times into memory, then use BitReader to read it back." << std::endl;
+	std::cout << "Test 14 - BitFileWriter write 1 666 times into memory, then use BitFileReader to read it back." << std::endl;
 
 	bool success = true;
 
 	int bitCount = 666;
 	int memSize = 700;
 	
-	u8* mem = new u8[memSize];
-	BitWriter w(mem,memSize);
+	std::shared_ptr<u8> mem(new u8[memSize]);
+	BitStringWriter w(std::string(mem.get(),mem.get()+memSize));
 	for( int i = 0; i < bitCount; ++i )
 		w.writeBits(0x1,1);
 
-	w.close();
+	w.flush();
 
-	BitReader r(mem,memSize);
+	BitStringReader r(w.getString() );
 
 	for( int i = 0; i < bitCount; ++i)
 	{
@@ -526,7 +526,9 @@ bool test14()
 		{
 			std::cout << 
 				"\t" <<
-				"Failed at bits: " << i << std::endl;
+				"Failed at bits: " << i << 
+				" Read " << word <<
+				std::endl;
 
 			success = false;
 		}
@@ -544,20 +546,21 @@ bool test15()
 	
 	bool success = true;
 
-	const char* text = "/WED/WE/WEE/WEB/WET";
+	const char* text_str = "/WED/WE/WEE/WEB/WET";
+	const std::string text(text_str,strlen(text_str));
 	
 	u32 expectedOut[] = { '/','W','E','D',ADJUST(256),'E',ADJUST(260),ADJUST(261),ADJUST(257),'B',ADJUST(260),'T', Lzw::EndOfData };
 	size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
 	
 	{
 		Codec* codec = new Lzw();
-		BitReader r(text, strlen(text));
-		BitWriter w("../testdata/Lzw.out");
-		codec->encode(r,w);
+		BitStringReader r(text);
+		BitFileWriter w("../testdata/Lzw.out");
+		codec->encode(&r,&w);
 		delete codec;
 	}
 
-	BitReader r("../testdata/Lzw.out");
+	BitFileReader r("../testdata/Lzw.out");
 	u32 word = 0;
 	int expectedIndex = 0;
 	while( int bitsRead = r.readBits(&word,12) )
@@ -589,9 +592,9 @@ bool test15()
 
 bool test16()
 {
-	std::cout << "Test 16 - BitReader Test that we return the correct number of bits read" << std::endl;
+	std::cout << "Test 16 - BitFileReader Test that we return the correct number of bits read" << std::endl;
 
-	BitReader r("../testdata/hello.txt");
+	BitFileReader r("../testdata/hello.txt");
 	
 	bool success = true;
 	u32 word = 0;
@@ -614,28 +617,28 @@ bool test17()
 	
 	bool success = true;
 
-	const char* text = "/WED/WE/WEE/WEB/WET";
+	const std::string text("/WED/WE/WEE/WEB/WET");
 	u32 expectedOut[] = { '/','W','E','D',256,'E',260,261,257,'B',260,'T' };
 	size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
 	
 	{
 		Codec* codec = new Lzw();
-		BitReader r(text, strlen(text));
-		BitWriter w("../testdata/Lzw.out");
-		codec->encode(r,w);
+		BitStringReader r(text);
+		BitFileWriter w("../testdata/Lzw.out");
+		codec->encode(&r,&w);
 		delete codec;
 	}
 
 
 	{
 		Codec* codec = new Lzw();
-		BitReader r("../testdata/Lzw.out");
-		BitWriter w("../testdata/Lzw.txt");
-		codec->decode(r,w);
+		BitFileReader r("../testdata/Lzw.out");
+		BitFileWriter w("../testdata/Lzw.txt");
+		codec->decode(&r,&w);
 		delete codec;
 	}
 	{
-		BitReader r("../testdata/Lzw.txt");
+		BitFileReader r("../testdata/Lzw.txt");
 		char c;
 		int i = 0;
 		while(r.readBits(&c,8))
@@ -656,19 +659,19 @@ bool test18()
 	int success = true;	
 	std::unique_ptr<Codec> codec(new Lzw());
 	{
-		BitReader r("../testdata/alice.txt");
-		BitWriter w("../testdata/alice.out");
-		codec->encode(r,w);
+		BitFileReader r("../testdata/alice.txt");
+		BitFileWriter w("../testdata/alice.out");
+		codec->encode(&r,&w);
 	}
 
 	{
-		BitReader r("../testdata/alice.out");
-		BitWriter w("../testdata/alice.txtout");
-		codec->decode(r,w);
+		BitFileReader r("../testdata/alice.out");
+		BitFileWriter w("../testdata/alice.txtout");
+		codec->decode(&r,&w);
 	}
 	{
-		BitReader r1("../testdata/alice.txt");
-		BitReader r2("../testdata/alice.txtout");
+		BitFileReader r1("../testdata/alice.txt");
+		BitFileReader r2("../testdata/alice.txtout");
 		char c1,c2;
 		int i = 0;
 		while(r1.readBits(&c1,8) && r2.readBits(&c2,8))

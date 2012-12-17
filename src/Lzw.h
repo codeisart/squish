@@ -16,8 +16,8 @@ public:
 
 	enum { EndOfData = 256, BumpBitSize, FlushDictionary, FirstCode};
 protected:
-	virtual size_t encode( BitReader& src, BitWriter& dst ) override;	
-	virtual size_t decode( BitReader& src, BitWriter& dst ) override; 
+	virtual size_t encode( BitReader* src, BitWriter* dst ) override;	
+	virtual size_t decode( BitReader* src, BitWriter* dst ) override; 
 
 	enum { BitSize = 12 };
 private:
