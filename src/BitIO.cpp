@@ -8,6 +8,7 @@ bool BitReader::fillBuffer()
 	m_in->read((char*)&m_bitBuffer,sizeof(m_bitBuffer));		
 	m_endOfData = m_in->eof();
 	//std::cout << "fillBuffer - " << static_cast<int>(m_bitBuffer) << ", eof=" << m_endOfData << std::endl;
+
 	return m_endOfData;
 }
 

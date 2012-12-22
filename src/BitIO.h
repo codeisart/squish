@@ -5,8 +5,10 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <memory>
 #include "Util.h"
 #include "BasicTypes.h"
+#include "DebugLog.h"
 
 class BitWriter
 {
@@ -23,7 +25,6 @@ public:
 			writeBuffer(); 
 		
 		m_out->flush();
-		//std::cout << "flush()" << std::endl;
 	}
 
 	virtual ~BitWriter() 
@@ -32,7 +33,7 @@ public:
 	} 	
 
 	template<typename T> 
-	int writeBits(T word, int nBits)
+	int writeBits(T word, int nBits=sizeof(T)*8)
 	{
 		int i = 0;
 		for(; i < nBits; ++i)
@@ -46,20 +47,49 @@ public:
 		return i;
 	}
 
+	template<typename T> 
+	bool write(T word)
+	{
+		//M_DEBUGTRACE("writing: " << word);
+		return writeBits(word) == sizeof(T)*8;
+	}
+
 protected:
 	bool writeBuffer()
 	{     
 		m_out->write((char*)&m_bitBuffer,sizeof(m_bitBuffer));
-		//std::cout << "writeBuffer() - write: " << static_cast<int>(m_bitBuffer) << std::endl;
 		m_currentBitIndex = 0;
 		m_bitBuffer = 0;
 		return false;
 	}
 
+	typedef u8 BitBufferType;
+
 	std::ostream* m_out;
-	u8 m_bitBuffer;
+	BitBufferType m_bitBuffer;
 	int m_currentBitIndex;
 };
+
+template<>
+inline int BitWriter::writeBits<std::string>(const std::string s, int)
+{
+	for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+		writeBits<char>(*i,8);
+
+	return 8 * s.size();
+}
+
+template<>
+inline bool BitWriter::write<std::string>(std::string s)
+{
+	//M_DEBUGTRACE("writing " << s);
+
+	// Write NULL terminated string object.
+	for(auto i:s)
+		write(i);
+	write('\0');
+	return true;
+}
 
 class BitStringWriter : public BitWriter
 {
@@ -84,11 +114,13 @@ public:
 	BitFileWriter(const char* filename)
 		: Base(&m_fileStream)
 	{
-	        m_fileStream.open(filename, std::ifstream::in | std::ifstream::binary);
+	        m_fileStream.open(filename, std::ios::out | std::ios::binary);
+		//M_DEBUGTRACE("open=" << m_fileStream.is_open());
 	}
 
 	~BitFileWriter()
 	{
+		flush();
 		close();
 	}
 
@@ -99,14 +131,6 @@ public:
 	}
 };
 
-template<>
-inline int BitWriter::writeBits<std::string>(const std::string s, int)
-{
-	for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
-		writeBits<char>(*i,8);
-
-	return 8 * s.size();
-}
 
 class BitReader
 {
@@ -122,7 +146,18 @@ public:
 	{}
 
 	template<typename WordSize>
-	int readBits(WordSize* word, int nBits);
+	int readBits(WordSize* word, int nBits=sizeof(WordSize)*8);
+
+	template<typename WordSize>
+	bool read(WordSize* word)
+	{
+		int nBits = readBits(word);
+		//M_DEBUGTRACE("  opopopop - Read: " << nBits << " expecting: " << (sizeof(WordSize)*8));
+		return nBits == sizeof(WordSize)*8;
+
+	}
+	
+	bool endOfData() { return m_endOfData; }
 
 protected:
 	bool fillBuffer();
@@ -132,6 +167,18 @@ protected:
 	int m_currentBitIndex;
 	bool m_endOfData;
 };
+
+template<>
+inline bool BitReader::read<std::string>(std::string* str)
+{
+	// Read NULL terminated string.
+	char c;
+	while(read(&c) && c)
+		str->push_back(c);	
+
+	return true;
+}
+
 
 template<typename WordSize>
 inline int BitReader::readBits(WordSize* out, int nBitsToRead)
@@ -148,10 +195,6 @@ inline int BitReader::readBits(WordSize* out, int nBitsToRead)
 		WordSize bit = (m_bitBuffer >> m_currentBitIndex++) & 0x1;	
 		word |= bit << i;	
 	}
-
-	//if(m_endOfData)
-	//	std::cout << "endOfData" << std::endl;
-	
 	*out = word;
 	
 	return i;
@@ -186,13 +229,13 @@ public:
 		:Base(&m_inFile)
 	{
 		m_inFile.open(filename, std::ios::in | std::ios::binary);
+		//M_DEBUGTRACE("open=" << m_inFile.is_open());
 		fillBuffer();
 	}	
 	~BitFileReader()
 	{
 		close();
 	}
-
 };
 
 

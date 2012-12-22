@@ -66,10 +66,12 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_squish_OBJECTS = Squish.$(OBJEXT) BitIO.$(OBJEXT) Lzw.$(OBJEXT)
+am_squish_OBJECTS = Squish.$(OBJEXT) BitIO.$(OBJEXT) Lzw.$(OBJEXT) \
+	Archive.$(OBJEXT)
 squish_OBJECTS = $(am_squish_OBJECTS)
 squish_LDADD = $(LDADD)
-am_testsuite_OBJECTS = Tests.$(OBJEXT) BitIO.$(OBJEXT) Lzw.$(OBJEXT)
+am_testsuite_OBJECTS = Tests.$(OBJEXT) BitIO.$(OBJEXT) Lzw.$(OBJEXT) \
+	Archive.$(OBJEXT)
 testsuite_OBJECTS = $(am_testsuite_OBJECTS)
 testsuite_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -182,8 +184,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-squish_SOURCES = Squish.cpp Util.h BitIO.cpp BitIO.h Lzw.cpp Lzw.h
-testsuite_SOURCES = Tests.cpp Util.h BitIO.cpp BitIO.h Lzw.cpp Lzw.h
+squish_SOURCES = Squish.cpp Util.h BitIO.cpp BitIO.h Lzw.cpp Lzw.h Archive.h Archive.cpp
+testsuite_SOURCES = Tests.cpp Util.h BitIO.cpp BitIO.h Lzw.cpp Lzw.h Archive.h Archive.cpp
 AM_DEFAULT_SOURCE_EXT = .cpp
 all: all-am
 
@@ -275,6 +277,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Archive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BitIO.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Lzw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Squish.Po@am__quote@

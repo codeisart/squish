@@ -1,0 +1,7 @@
+-std=c++11 
+-stdlib=libc++ 
+-nostdinc++ 
+-I/Users/Jimmy/libc++-dev/libcxx/include 
+-DHAVE_CONFIG_H 
+-I. 
+-I.. 

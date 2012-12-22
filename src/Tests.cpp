@@ -5,6 +5,8 @@
 #include "BitIO.h"
 #include "Codec.h"
 #include "Lzw.h"
+#include "DebugLog.h"
+#include "Archive.h"
 
 #include <memory>
 #include <iostream>
@@ -65,20 +67,20 @@ bool test2()
 	std::cout << "Test 2 - BitFileReader read hello file 2 bits at a time until end." << std::endl;
 
 	const char* helloStr = "hello";
-	const u8 expectedOutput[] = 
-		{0,2,2,1,		// h
-		1,1,2,1,		// e
-		0,3,2,1,  		// l
-		0,3,2,1,  		// l
-		3,3,2,1			// o
-	};	
+	//const u8 expectedOutput[] = 
+		//{0,2,2,1,		// h
+		//1,1,2,1,		// e
+		//0,3,2,1,  		// l
+		//0,3,2,1,  		// l
+		//3,3,2,1			// o
+	//};	
 
 	int size = strlen(helloStr);
 
 	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
-	int expectedIndex = 0;
+	//int expectedIndex = 0;
 	for( int strIndex = 0; strIndex < size; ++strIndex )
 	{
 		for(int i = 0; i < 8; i+=2)
@@ -120,7 +122,7 @@ bool test3()
 	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
-	int expectedIndex = 0;
+	//int expectedIndex = 0;
 
 	int totalBits = 8 * size;
 	for( int i = 0; i < totalBits; i+=3)
@@ -161,7 +163,7 @@ bool test4()
 	BitStringReader r(std::string(helloStr,helloStr+size));
 
 	bool success = true;
-	int expectedIndex = 0;
+	//int expectedIndex = 0;
 
 	int totalBits = 8 * size;
 	for( int i = 0; i < totalBits; i+=3)
@@ -203,7 +205,7 @@ bool test5()
 	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
-	int expectedIndex = 0;
+	//int expectedIndex = 0;
 
 	int totalBits = 8 * size;
 	int bitsRead = 0;
@@ -254,7 +256,7 @@ bool test6()
 	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
-	int expectedIndex = 0;
+	//int expectedIndex = 0;
 
 	int totalBits = 8 * size;
 	for( int i = 0; i < totalBits; i+=12)
@@ -295,7 +297,7 @@ bool test7()
 	BitFileReader r("../testdata/hello.txt");
 
 	bool success = true;
-	int expectedIndex = 0;
+	//int expectedIndex = 0;
 
 	int totalBits = 8 * size;
 	
@@ -482,8 +484,14 @@ bool test13()
 		for( int i = 0; i < bitCount; ++i)
 		{
 			u32 word = 0;
-			r.readBits(&word,1);
+			int bitsRead = r.readBits(&word,1);
 			
+			if(bitsRead != 1)
+			{
+				std::cout << "\tExpected to read 1 bit but read " << bitsRead << " at index " << i << std::endl;
+		
+			}
+
 			if( word != 1 )
 			{
 				std::cout << 
@@ -550,7 +558,7 @@ bool test15()
 	const std::string text(text_str,strlen(text_str));
 	
 	u32 expectedOut[] = { '/','W','E','D',ADJUST(256),'E',ADJUST(260),ADJUST(261),ADJUST(257),'B',ADJUST(260),'T', Lzw::EndOfData };
-	size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
+	//size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
 	
 	{
 		Codec* codec = new Lzw();
@@ -618,8 +626,8 @@ bool test17()
 	bool success = true;
 
 	const std::string text("/WED/WE/WEE/WEB/WET");
-	u32 expectedOut[] = { '/','W','E','D',256,'E',260,261,257,'B',260,'T' };
-	size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
+	//u32 expectedOut[] = { '/','W','E','D',256,'E',260,261,257,'B',260,'T' };
+	//size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
 	
 	{
 		Codec* codec = new Lzw();
@@ -688,6 +696,56 @@ bool test18()
 	return success;
 }
 
+bool test19()
+{
+	std::cout << "Test 19 - Write null terminated string to a file." << std::endl;
+	std::string teststr = "testing12345";
+	bool success = true;
+
+	{
+		// write some null terminated strings.
+		BitFileWriter w("../testdata/nullstr.txt");
+		success = w.write(teststr);
+		w.close();
+	}
+
+	BitFileReader r("../testdata/nullstr.txt");
+	std::string readstr;
+	success &= r.read(&readstr);
+
+	//M_DEBUGTRACE(" - read: " << readstr << " expecting: " << teststr);
+	return success && readstr == teststr;
+}
+
+bool test20()
+{
+	std::cout << "Test 20 - Write null terminated string to memory." << std::endl;
+	std::string teststr = "testing12345";
+	bool success = true;
+
+	// write some null terminated strings.
+	BitStringWriter w("");
+	success = w.write(teststr);
+
+	BitStringReader r(w.getString());
+	std::string readstr;
+	success &= r.read(&readstr);
+
+	//M_DEBUGTRACE(" - read: " << readstr << " expecting: " << teststr);
+	return success && readstr == teststr;
+}
+
+bool test21()
+{
+	std::cout << "Test 21 - Create an empty archive, write it and read it back" << std::endl;
+	bool success = true;
+
+	//auto a = Archive::serialize(
+	// TODO: make this work.
+
+	return success;
+}
+
 bool runTests()
 {
 	bool success = true;
@@ -712,6 +770,9 @@ bool runTests()
 		success &= test16();
 		success &= test17();
 		success &= test18();
+		success &= test19();
+		success &= test20();
+		success &= test21();
 	}
 	catch (std::bad_alloc* e)
 	{

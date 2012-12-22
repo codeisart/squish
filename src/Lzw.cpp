@@ -67,7 +67,7 @@ size_t Lzw::encode(BitReader* src, BitWriter* dst)
 			dst->writeBits(codes[current],bitSize);
 			current = c;
 			
-			if(nextCode > (1 << bitSize)-1)
+			if(nextCode > static_cast<u32>(1 << bitSize)-1)
 			{
 				dst->writeBits(static_cast<u32>(BumpBitSize), bitSize);
 				bitSize++;

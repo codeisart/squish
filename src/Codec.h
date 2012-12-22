@@ -9,6 +9,7 @@ class BitWriter;
 class Codec
 {
 public:
+	virtual ~Codec() {}
 	virtual size_t encode(BitReader* src, BitWriter* dst) = 0;
 	virtual size_t decode(BitReader* src, BitWriter* dst) = 0;
 };
