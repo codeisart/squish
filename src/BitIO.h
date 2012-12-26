@@ -50,8 +50,23 @@ public:
 	template<typename T> 
 	bool write(T word)
 	{
-		//M_DEBUGTRACE("writing: " << word);
 		return writeBits(word) == sizeof(T)*8;
+	}
+
+	void seek(std::ios::streamoff offset)
+	{
+		flush();
+		m_out->seekp(offset, std::ios::beg);
+	}
+
+	std::ios::streamoff tell() const
+	{
+		std::ios::streamoff off = m_out->tellp();
+		
+		// If we are half way through a byte round up.
+		if(m_currentBitIndex>0)
+			off++;
+		return off;
 	}
 
 protected:
@@ -82,8 +97,6 @@ inline int BitWriter::writeBits<std::string>(const std::string s, int)
 template<>
 inline bool BitWriter::write<std::string>(std::string s)
 {
-	//M_DEBUGTRACE("writing " << s);
-
 	// Write NULL terminated string object.
 	for(auto i:s)
 		write(i);
@@ -115,7 +128,6 @@ public:
 		: Base(&m_fileStream)
 	{
 	        m_fileStream.open(filename, std::ios::out | std::ios::binary);
-		//M_DEBUGTRACE("open=" << m_fileStream.is_open());
 	}
 
 	~BitFileWriter()
@@ -140,6 +152,7 @@ public:
 		, m_bitBuffer(0)
 		, m_currentBitIndex(0)
 		, m_endOfData(false)
+		, m_lastValidTell(0)
 	{}
 
 	virtual ~BitReader()
@@ -152,12 +165,32 @@ public:
 	bool read(WordSize* word)
 	{
 		int nBits = readBits(word);
-		//M_DEBUGTRACE("  opopopop - Read: " << nBits << " expecting: " << (sizeof(WordSize)*8));
 		return nBits == sizeof(WordSize)*8;
-
 	}
 	
 	bool endOfData() { return m_endOfData; }
+
+	void seek(std::ios::streamoff offset)
+	{
+		m_in->clear();
+		m_in->seekg(offset,std::ios::beg);
+		fillBuffer();
+	}
+
+	std::ios::streamoff tell() const
+	{	
+		// If we are half way through a byte round up.
+		//if(m_currentBitIndex>0)
+		//	return m_lastValidTell+1;
+
+		return m_lastValidTell;
+	}
+
+	void roundUp()
+	{
+		if(m_currentBitIndex)
+			fillBuffer();
+	}
 
 protected:
 	bool fillBuffer();
@@ -166,11 +199,37 @@ protected:
 	u8 m_bitBuffer;
 	int m_currentBitIndex;
 	bool m_endOfData;
+	std::ios::streamoff m_lastValidTell;
 };
+
+inline bool BitReader::fillBuffer()
+{
+	// Cache the position
+	std::ios::streamoff oldPos = m_in->tellg();
+
+	m_currentBitIndex = 0;
+	m_in->read((char*)&m_bitBuffer,sizeof(m_bitBuffer));		
+	m_endOfData = m_in->eof();
+
+	// Remember the last valid position we were on. 
+	std::ios::streamoff newPos = m_in->tellg();
+	if(newPos!=-1)
+		m_lastValidTell = newPos;
+	else if(oldPos != -1)
+		m_lastValidTell = oldPos+1;	
+
+	//std::cout << "gtell:" << tell() << " eof=" << m_endOfData << std::endl;
+	//std::cout << "fillBuffer - " << static_cast<int>(m_bitBuffer) << ", eof=" << m_endOfData << std::endl;
+
+	return m_endOfData;
+}
 
 template<>
 inline bool BitReader::read<std::string>(std::string* str)
 {
+	// Zero out the string to begin with.
+	str->clear();
+
 	// Read NULL terminated string.
 	char c;
 	while(read(&c) && c)
@@ -178,7 +237,6 @@ inline bool BitReader::read<std::string>(std::string* str)
 
 	return true;
 }
-
 
 template<typename WordSize>
 inline int BitReader::readBits(WordSize* out, int nBitsToRead)
@@ -229,7 +287,6 @@ public:
 		:Base(&m_inFile)
 	{
 		m_inFile.open(filename, std::ios::in | std::ios::binary);
-		//M_DEBUGTRACE("open=" << m_inFile.is_open());
 		fillBuffer();
 	}	
 	~BitFileReader()
@@ -237,6 +294,5 @@ public:
 		close();
 	}
 };
-
 
 #endif //D_BITIO_

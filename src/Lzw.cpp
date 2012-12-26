@@ -19,6 +19,8 @@ size_t Lzw::decode(BitReader* src, BitWriter* dst)
 	u32 nextCode = FirstCode;
 	u32 bitSize = BitSize;
 
+	//std::cout << "decoding... @ " << src->tell() << std::endl;
+
 	for(u32 i = 0; i < 256; ++i)
 		codes[i] = std::string(1,(char)i);
 
@@ -46,6 +48,8 @@ size_t Lzw::decode(BitReader* src, BitWriter* dst)
 
 size_t Lzw::encode(BitReader* src, BitWriter* dst)
 {
+	//std::cout << "encoding... @ " << dst->tell() << std::endl;
+	
 	typedef std::unordered_map<std::string,u32> Codes;
 
 	Codes codes;

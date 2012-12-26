@@ -9,6 +9,7 @@
 #include "Archive.h"
 
 #include <memory>
+#include <algorithm>
 #include <iostream>
 #include <exception>
 
@@ -738,13 +739,305 @@ bool test20()
 bool test21()
 {
 	std::cout << "Test 21 - Create an empty archive, write it and read it back" << std::endl;
-	bool success = true;
 
-	//auto a = Archive::serialize(
-	// TODO: make this work.
+	static const char* kFile = "../testdata/string_archive.bin";
+	// write.
+	{
+		auto w = std::shared_ptr<BitWriter>(new BitFileWriter(kFile));
+		auto a = Archive::create(w);
+	}
 
-	return success;
+	// read.
+	auto r = std::shared_ptr<BitReader>(new BitFileReader(kFile));
+	auto a = Archive::load(r);
+
+	// check?
+	return a->contents().empty();
 }
+
+bool test22()
+{
+	static const char* kFile = "../testdata/string_archive.bin";
+	static const std::string recordName = "mystring.txt";
+	static const std::string testingStr = "testing123...";
+
+	std::cout << "Test 22 - Add a string to an archive and read it back." << std::endl;
+
+	// write.
+	{
+		auto r = std::shared_ptr<BitReader>(new BitStringReader(testingStr));
+		auto w = std::shared_ptr<BitWriter>(new BitFileWriter(kFile));
+		auto a = Archive::create(w);
+		a->add(recordName, r.get());
+	}
+
+	// read.
+	auto r = std::shared_ptr<BitReader>(new BitFileReader(kFile));
+	auto a = Archive::load(r);
+
+	// check the file is found in the archive.
+	auto contents = a->contents();
+	auto i = std::find(contents.begin(),contents.end(), recordName);
+	if(i== contents.end())
+	{
+		std::cout << "failed to find " << recordName << " in archive" << std::endl;
+		for(auto c:contents)
+			std::cout << c << std::endl;
+		return false;		
+	}
+
+	// decode it.
+	auto w = std::shared_ptr<BitWriter>(new BitStringWriter(""));
+	if(!a->get(recordName,w))
+	{
+		std::cout << "get failed to get the file" << std::endl;
+		return false;		
+	}
+
+	// finally check it decoded correctly.
+	std::string str = static_cast<BitStringWriter*>(w.get())->getString();
+	bool pass = str == testingStr;
+	if(!pass)
+	{
+		std::cout << "strings not the same: " << str << " vs " << testingStr << std::endl;
+	}
+	
+	return pass;
+}
+
+
+bool test23()
+{
+	static const char* kFile = "../testdata/alice_archive.bin";
+	static const std::string recordName = "alicec.txt";
+	static const std::string testFile = "../testdata/alice.txt";
+
+	std::cout << "Test 23 - Add alice in wonderland to an archive and read it back." << std::endl;
+
+	// write.
+	{
+		auto r = std::shared_ptr<BitReader>(new BitFileReader(testFile.c_str()));
+		auto w = std::shared_ptr<BitWriter>(new BitFileWriter(kFile));
+		auto a = Archive::create(w);
+		a->add(recordName, r.get());
+	}
+
+	// read.
+	auto r = std::shared_ptr<BitReader>(new BitFileReader(kFile));
+	auto a = Archive::load(r);
+
+	// check the file is found in the archive.
+	auto contents = a->contents();
+	auto i = std::find(contents.begin(),contents.end(), recordName);
+	if(i== contents.end())
+	{
+		std::cout << "failed to find " << recordName << " in archive" << std::endl;
+		for(auto c:contents)
+			std::cout << c << std::endl;
+		return false;		
+	}
+
+	// decode it.
+	auto w = std::shared_ptr<BitWriter>(new BitStringWriter(""));
+	if(!a->get(recordName,w))
+	{
+		std::cout << "get failed to get the file" << std::endl;
+		return false;		
+	}
+
+	// finally check it decoded correctly.
+	return true;
+}
+
+bool test24()
+{
+	static const char* kFile = "../testdata/multi_archive.bin";
+	static const std::string recordName1 = "alice.txt";
+	static const std::string recordName2 = "pan.txt";
+	static const std::string dataPath = "../testdata/";
+	static const std::string testFile1 = dataPath + recordName1;
+	static const std::string testFile2 = dataPath + recordName2;
+
+	std::cout << "Test 24 - Add two files to the archive" << std::endl;
+
+	// Make an archive.
+	{
+		auto w = std::shared_ptr<BitWriter>(new BitFileWriter(kFile));
+		auto a = Archive::create(w);
+	
+		// write 1.	
+		{
+			auto r = std::shared_ptr<BitReader>(new BitFileReader(testFile1.c_str()));
+			a->add(recordName1, r.get());
+		}
+
+		// write 2.
+		{
+			auto r = std::shared_ptr<BitReader>(new BitFileReader(testFile2.c_str()));
+			a->add(recordName2, r.get());
+		}
+	}
+
+	// read.
+	auto r = std::shared_ptr<BitReader>(new BitFileReader(kFile));
+	auto a = Archive::load(r);
+
+	// check both files are found in the archive.
+	auto contents = a->contents();
+	auto i1 = std::find(contents.begin(),contents.end(), recordName1);
+	auto i2 = std::find(contents.begin(),contents.end(), recordName2);
+
+	if(i1== contents.end())
+	{
+		std::cout << "failed to find " << recordName1 << " in archive" << std::endl;
+		for(auto c:contents)
+			std::cout << c << std::endl;
+		return false;		
+	}
+	if(i2== contents.end())
+	{
+		std::cout << "failed to find " << recordName2 << " in archive" << std::endl;
+		for(auto c:contents)
+			std::cout << c << std::endl;
+		return false;		
+	}
+
+	// decode them both.
+	auto w1 = std::shared_ptr<BitWriter>(new BitFileWriter("../testdata/r1.txt"));
+	if(!a->get(recordName1,w1))
+	{
+		std::cout << "get failed to get file1" << std::endl;
+		return false;		
+	}
+	
+	auto w2 = std::shared_ptr<BitWriter>(new BitFileWriter("../testdata/r2.txt"));
+	if(!a->get(recordName2,w2))
+	{
+		std::cout << "get failed to get file2" << std::endl;
+		return false;		
+	}
+
+	// finally check it decoded correctly.
+	return true;
+}
+
+bool test25()
+{
+	std::cout << "Test 25 - Seek and Tell test" << std::endl;
+	static const std::string testFile = "../testdata/seek_test.dat";
+	std::streamoff off;
+	static const u32 magic = 0xdeadbeaf;
+
+	{
+		auto w = std::shared_ptr<BitWriter>(new BitFileWriter(testFile.c_str()));
+
+		for(auto i = 0;i < 789;i++)
+			w->writeBits(0, 1);
+
+		w->writeBits(1,1);
+
+		w->seek(34);
+
+		w->writeBits(1,1);
+		w->writeBits(0,1);
+		w->write<u32>(magic);
+	
+		off = w->tell();
+		off =+ 9;
+		w->seek(off);
+		
+		w->writeBits(1,1);
+		w->writeBits(0,1);
+		w->write<u32>(magic);
+	}
+	{
+		auto r = std::shared_ptr<BitReader>(new BitFileReader(testFile.c_str()));
+
+		u32 word;
+		for(auto i = 0;i < 789;i++)
+			r->readBits(&word, 1);
+
+		if(!r->readBits(&word,1) || word != 1)
+			return false;
+
+		r->seek(34);
+		if(r->readBits(&word,1)!=1 || word != 1)
+			return false;
+		if(r->readBits(&word,1)!=1 || word != 0)
+			return false;
+		if(!r->read<u32>(&word) || word != magic)
+		{
+			std::cout << "read " << std::hex << word << std::dec << std::endl;
+			return false;
+		}
+
+		off = r->tell();
+		off =+ 9;
+		r->seek(off);
+		
+		if(r->readBits(&word,1)!=1 || word != 1)
+			return false;
+		if(r->readBits(&word,1)!=1 || word != 0)
+			return false;
+		if(!r->read(&word) || word != magic)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool test26()
+{
+	std::cout << "Test 26 - Reader File size test" << std::endl;
+	static const std::string testFile = "../testdata/alice.txt";
+
+	auto r = std::shared_ptr<BitReader>(new BitFileReader(testFile.c_str()));
+	u8 byte;
+	std::streamoff b = r->tell();
+
+	r->readBits(&byte,3);
+	while(r->read(&byte));
+
+	std::streamoff e = r->tell();
+
+	std::streamoff size = e-b;
+	bool pass = size == 167517;	
+
+	if(!pass)
+		std::cout << "failed, expecting " << 167517 << " read " << size << std::endl;
+
+	return pass;
+}
+
+bool test27()
+{
+	std::cout << "Test 27 - Writer File size test" << std::endl;
+	static const char* kFile = "../testdata/size_writer.bin";
+	static const std::string recordName = "mystring.txt";
+	static const std::string testingStr = "testing123...";
+
+	// write.
+	auto r = std::shared_ptr<BitReader>(new BitStringReader(testingStr));
+	auto w = std::shared_ptr<BitWriter>(new BitFileWriter(kFile));
+
+	w->writeBits(1,3);
+
+	std::streamoff b = w->tell();
+	w->write(testingStr);
+	std::streamoff e = w->tell();
+
+	std::streamoff size = (e-b)-1;
+	bool pass = static_cast<std::streamoff>(testingStr.size()) == size;
+	if(!pass)
+		std::cout << "string is " << testingStr.size() << ", calculated=" << size << std::endl;
+	
+	return pass;
+}
+
+#define RUNTEST(t) { bool pass = t(); pass ? std::cout << " pass." << std::endl : std::cout << " FAIL!" << std::endl; success = success && pass;  }
+
 
 bool runTests()
 {
@@ -752,27 +1045,33 @@ bool runTests()
 
 	try
 	{
-		success &= test1();
-		success &= test2();
-		success &= test3();
-		success &= test4();
-		success &= test5();
-		success &= test6();
-		success &= test7();
-		success &= test8();
-		success &= test9();
-		success &= test10();
-		success &= test11();
-		success &= test12();
-		success &= test13();
-		success &= test14();
-		success &= test15();
-		success &= test16();
-		success &= test17();
-		success &= test18();
-		success &= test19();
-		success &= test20();
-		success &= test21();
+		RUNTEST(test1);
+		RUNTEST(test2);
+		RUNTEST(test3);
+		RUNTEST(test4);
+		RUNTEST(test5);
+		RUNTEST(test6);
+		RUNTEST(test7);
+		RUNTEST(test8);
+		RUNTEST(test9);
+		RUNTEST(test10);
+		RUNTEST(test11);
+		RUNTEST(test12);
+		RUNTEST(test13);
+		RUNTEST(test14);
+		RUNTEST(test15);
+		RUNTEST(test16);
+		RUNTEST(test17);
+		RUNTEST(test18);
+		RUNTEST(test19);
+		RUNTEST(test20);
+		RUNTEST(test21);
+		RUNTEST(test22);
+		RUNTEST(test23);
+		RUNTEST(test24);
+		RUNTEST(test25);
+		RUNTEST(test26);
+		RUNTEST(test27);
 	}
 	catch (std::bad_alloc* e)
 	{
