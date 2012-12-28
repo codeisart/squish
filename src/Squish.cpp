@@ -3,6 +3,7 @@
 #include "Codec.h"
 #include "Lzw.h"
 #include "Archive.h"
+#include "config.h"
 
 #include <memory>
 #include <iostream>
@@ -116,6 +117,21 @@ public:
 	}
 };
 
+
+class HelpCommand : public ICommand
+{
+public:
+	virtual bool execute(const SquishState& state) 
+	{
+		std::cout << " -x Extract Archive." << std::endl;
+		std::cout << " -a Add files to a new Archive." << std::endl;
+		std::cout << " -l List Archive." << std::endl;
+		std::cout << " -h This help text." << std::endl;
+		return true;
+	}
+};
+
+
 std::shared_ptr<ICommand> processCommand(std::string& cmd)
 {
 	if(cmd.size() < 2)
@@ -133,6 +149,10 @@ std::shared_ptr<ICommand> processCommand(std::string& cmd)
 
 		// list contents.
 		case 'l': return std::shared_ptr<ICommand>(new ListCommand());
+
+		// help
+		case 'h': 
+		case '?': return std::shared_ptr<ICommand>(new HelpCommand());
 
 		// error.
 		default:
@@ -179,6 +199,9 @@ bool processArgs(std::vector<std::string>& args, SquishState& state)
 int main(int argc, char** argv)
 { 	
 	SquishState state;
+
+	// Display banner.
+	std::cout << PACKAGE_STRING << " - please send feeback to " << PACKAGE_BUGREPORT << std::endl;
 
 	// Process args.
 	std::vector<std::string> args(argv+1,argv+argc);
