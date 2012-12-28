@@ -41,7 +41,8 @@ private:
 		//w->write(r.filename);	        // []	
 
 		std::streamoff header_pos = r->tell();
-		
+		(void)header_pos;	
+	
 		u32 magic;
 		if(!r->read(&magic) || RecordMagic != magic)
 		{
@@ -168,6 +169,13 @@ public:
 	{
 	}
 
+	struct Info
+	{
+		std::string 	filename;
+		size_t  	packedSize;
+		size_t 		size;
+	};
+
 	// Factory.
 	static std::shared_ptr<Archive> create(std::shared_ptr<BitWriter> w)
 	{
@@ -245,11 +253,17 @@ public:
 		return e-b == i->size;
 	}
 
-	std::vector<std::string> contents() const
+	std::vector<Info> contents() const
 	{
-		std::vector<std::string> files;	
+		std::vector<Info> files;	
 		for(auto i:m_contents)
-			files.push_back(i.filename);
+		{
+			Info info;
+			info.filename 	= i.filename;
+			info.size     	= i.size;
+			info.packedSize = i.packedSize;
+			files.push_back(info);
+		}
 		return files;
 	}
 

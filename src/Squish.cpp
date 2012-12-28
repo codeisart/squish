@@ -8,6 +8,8 @@
 #include <iostream>
 #include <exception>
 #include <vector>
+#include <iomanip>
+
 
 struct SquishState;
 
@@ -35,8 +37,30 @@ public:
 			auto f = std::shared_ptr<BitFileReader>(new BitFileReader(i.c_str()));
 			auto a = Archive::load(f);
 			auto c = a->contents();
+
+			auto bigName = std::max_element(c.begin(),c.end(), 
+				[](const Archive::Info& l, const Archive::Info& r)  { return l.filename.size() < r.filename.size(); } );
+			
+			auto bigSize = std::max_element(c.begin(),c.end(), 
+				[](const Archive::Info& l, const Archive::Info& r)  { return std::to_string(l.size).size() < std::to_string(r.size).size(); } );
+			
+			auto bigPacked = std::max_element(c.begin(),c.end(), 
+				[](const Archive::Info& l, const Archive::Info& r)  { return std::to_string(l.packedSize).size() < std::to_string(r.packedSize).size(); } );
+
+			size_t nameWidth = bigName->filename.size() + 1;
+			size_t sizeWidth = std::to_string(bigSize->size).size() + 1;
+			size_t packedWidth = std::to_string(bigPacked->packedSize).size() + 1;
+
 			for(auto j:c)
-				std::cout << j << std::endl;
+			{
+				float ratio = (float)j.packedSize / j.size;
+				float cents = ratio * 100.0f;
+				std::cout << std::left << std::setw(nameWidth) << j.filename;
+				std::cout << std::left << std::setw(sizeWidth) << std::to_string(j.size);
+				std::cout << std::left << std::setw(packedWidth) << std::to_string(j.packedSize);
+				std::cout << std::left << std::setw(2) << std::setprecision(2) << cents << "%"; 
+				std::cout << std::endl;
+			}
 		}
 		return true;
 	}
@@ -82,9 +106,9 @@ public:
 			
 			for(auto j:c)
 			{
-				std::cout << "extracting: " << j << std::endl;
-				auto w = std::shared_ptr<BitWriter>(new BitFileWriter(j.c_str()));
-				a->get(j,w);
+				std::cout << "extracting: " << j.filename << std::endl;
+				auto w = std::shared_ptr<BitWriter>(new BitFileWriter(j.filename.c_str()));
+				a->get(j.filename,w);
 
 			}
 		}

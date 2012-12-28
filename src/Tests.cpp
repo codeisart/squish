@@ -777,12 +777,12 @@ bool test22()
 
 	// check the file is found in the archive.
 	auto contents = a->contents();
-	auto i = std::find(contents.begin(),contents.end(), recordName);
+	auto i = std::find_if(contents.begin(),contents.end(), [=](const Archive::Info& i) { return i.filename == recordName; });
 	if(i== contents.end())
 	{
 		std::cout << "failed to find " << recordName << " in archive" << std::endl;
 		for(auto c:contents)
-			std::cout << c << std::endl;
+			std::cout << c.filename << std::endl;
 		return false;		
 	}
 
@@ -828,12 +828,12 @@ bool test23()
 
 	// check the file is found in the archive.
 	auto contents = a->contents();
-	auto i = std::find(contents.begin(),contents.end(), recordName);
+	auto i = std::find_if(contents.begin(),contents.end(), [=] (const Archive::Info& i) { return recordName == i.filename; });
 	if(i== contents.end())
 	{
 		std::cout << "failed to find " << recordName << " in archive" << std::endl;
 		for(auto c:contents)
-			std::cout << c << std::endl;
+			std::cout << c.filename << std::endl;
 		return false;		
 	}
 
@@ -884,21 +884,21 @@ bool test24()
 
 	// check both files are found in the archive.
 	auto contents = a->contents();
-	auto i1 = std::find(contents.begin(),contents.end(), recordName1);
-	auto i2 = std::find(contents.begin(),contents.end(), recordName2);
+	auto i1 = std::find_if(contents.begin(),contents.end(), [=] (const Archive::Info& i) { return i.filename == recordName1; } );;
+	auto i2 = std::find_if(contents.begin(),contents.end(), [=] (const Archive::Info& i) { return i.filename == recordName2; } );;
 
 	if(i1== contents.end())
 	{
 		std::cout << "failed to find " << recordName1 << " in archive" << std::endl;
 		for(auto c:contents)
-			std::cout << c << std::endl;
+			std::cout << c.filename << std::endl;
 		return false;		
 	}
 	if(i2== contents.end())
 	{
 		std::cout << "failed to find " << recordName2 << " in archive" << std::endl;
 		for(auto c:contents)
-			std::cout << c << std::endl;
+			std::cout << c.filename << std::endl;
 		return false;		
 	}
 
