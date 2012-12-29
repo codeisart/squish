@@ -1,4 +1,3 @@
-SUBDIRS = src
+SUBDIRS = src testdata
 
-AM_CXXFLAGS		= -static-libstdc++ -static-libgcc
 ACLOCAL_AMFLAGS         = -I m4

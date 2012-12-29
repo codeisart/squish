@@ -1,3 +1,4 @@
+#include "config.h"
 #include "BasicTypes.h"
 #include "BitIO.h"
 #include "Codec.h"
@@ -59,7 +60,7 @@ public:
 				std::cout << std::left << std::setw(nameWidth) << j.filename;
 				std::cout << std::left << std::setw(sizeWidth) << std::to_string(j.size);
 				std::cout << std::left << std::setw(packedWidth) << std::to_string(j.packedSize);
-				std::cout << std::left << std::setw(2) << std::setprecision(2) << cents << "%"; 
+				std::cout << std::left << std::setw(2) << std::setprecision(3) << cents << "%"; 
 				std::cout << std::endl;
 			}
 		}

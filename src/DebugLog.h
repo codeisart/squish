@@ -1,3 +1,5 @@
+#include "config.h"
+
 #pragma once
 
 #include <iostream>

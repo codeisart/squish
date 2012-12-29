@@ -1,6 +1,7 @@
 // Compress.cpp : Defines the entry point for the console application.
 //
 
+#include "config.h"
 #include "BasicTypes.h"
 #include "BitIO.h"
 #include "Codec.h"
@@ -13,20 +14,12 @@
 #include <iostream>
 #include <exception>
 
-bool runTests();
+#define BOOST_TEST_MODULE SquishTests
+#include <boost/test/included/unit_test.hpp>
 
-#ifdef _MSC_VER
-int _tmain(int argc, _TCHAR* argv[])
-#else 
-int main(int, char** argv)
-#endif 
-{
-	std::cout << argv[0] << std::endl;
-	bool pass = runTests();
-	return pass ? 0 : -1;
-}
+BOOST_AUTO_TEST_SUITE(SquishTests)
 
-bool test1()
+BOOST_AUTO_TEST_CASE(test1)
 {
 	std::cout << "Test 1 - BitFileReader read hello file one bit at a time until end." << std::endl;
 		
@@ -60,10 +53,11 @@ bool test1()
 	}
 
 	// Pass.
-	return success;
+	//BOOST_CHECK(success);
+	BOOST_CHECK(success);
 }
 
-bool test2()
+BOOST_AUTO_TEST_CASE(test2)
 {
 	std::cout << "Test 2 - BitFileReader read hello file 2 bits at a time until end." << std::endl;
 
@@ -108,12 +102,11 @@ bool test2()
 		}	
 	}
 
-	// Pass.
-	return success;
+	BOOST_CHECK(success);
 }
 
 
-bool test3()
+BOOST_AUTO_TEST_CASE(test3)
 {
 	std::cout << "Test 3 - BitFileReader read hello file 3 bits at a time until the end" << std::endl;
 
@@ -151,10 +144,10 @@ bool test3()
 	}
 
 	// Pass.
-	return success;
+	BOOST_CHECK(success);
 }
 
-bool test4()
+BOOST_AUTO_TEST_CASE(test4)
 {
 	std::cout << "Test 4 - BitFileReader read in memory 3 bits at a time. " << std::endl;
 
@@ -192,11 +185,11 @@ bool test4()
 	}
 
 	// Pass.
-	return success;
+	BOOST_CHECK(success);
 }
 
 
-bool test5()
+BOOST_AUTO_TEST_CASE(test5)
 {
 	std::cout << "Test 5 - BitFileReader read in hello text file 8 bits at a time. " << std::endl;
 
@@ -244,10 +237,10 @@ bool test5()
 	}
 
 	// Pass.
-	return success;
+	BOOST_CHECK(success);
 }
 
-bool test6()
+BOOST_AUTO_TEST_CASE(test6)
 {
 	std::cout << "Test 6 - BitFileReader read in hello text file 12 bits at a time. " << std::endl;
 
@@ -285,10 +278,10 @@ bool test6()
 	}
 
 	// Pass.
-	return success;
+	BOOST_CHECK(success);
 }
 
-bool test7()
+BOOST_AUTO_TEST_CASE(test7)
 {
 	std::cout << "Test 7 - BitFileReader read in hello text file 12 bits until EOF " << std::endl;
 
@@ -332,11 +325,11 @@ bool test7()
 	}
 
 	// Pass.
-	return success;
+	BOOST_CHECK(success);
 }
 
 
-bool test8()
+BOOST_AUTO_TEST_CASE(test8)
 {
 	std::cout << "Test 8 - BitFileWriter write hello 1 bit at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
@@ -384,7 +377,7 @@ bool test8()
 	}
 
 	// Pass.
-	return success;
+	BOOST_CHECK(success);
 }
 
 bool nBitsInAndOutHelloTest(int bitWordSize)
@@ -437,37 +430,37 @@ bool nBitsInAndOutHelloTest(int bitWordSize)
 }
 
 
-bool test9()
+BOOST_AUTO_TEST_CASE(test9)
 {
 	std::cout << "Test 9 - BitFileWriter write hello 2 bits at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	// Pass.
-	return nBitsInAndOutHelloTest(2);
+	BOOST_CHECK( nBitsInAndOutHelloTest(2));
 }
-bool test10()
+BOOST_AUTO_TEST_CASE(test10)
 {
 	std::cout << "Test 10 - BitFileWriter write hello 3 bits at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	// Pass.
-	return nBitsInAndOutHelloTest(3);
+	BOOST_CHECK( nBitsInAndOutHelloTest(3));
 }
-bool test11()
+BOOST_AUTO_TEST_CASE(test11)
 {
 	std::cout << "Test 11 - BitFileWriter write hello 12 bits at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	// Pass.
-	return nBitsInAndOutHelloTest(12);
+	BOOST_CHECK( nBitsInAndOutHelloTest(12));
 }
 
-bool test12()
+BOOST_AUTO_TEST_CASE(test12)
 {
 	std::cout << "Test 12 - BitFileWriter write hello 8 bits at a time into a text file, then using BitFileReader to read it back." << std::endl;
 
 	// Pass.
-	return nBitsInAndOutHelloTest(8);
+	BOOST_CHECK( nBitsInAndOutHelloTest(8));
 };
 
-bool test13()
+BOOST_AUTO_TEST_CASE(test13)
 {
 	std::cout << "Test 13 - BitFileWriter write 1 666 times into a file, then use BitFileReader to read it back." << std::endl;
 	
@@ -504,11 +497,11 @@ bool test13()
 
 		}
 	}
-	return success;
+	BOOST_CHECK(success);
 }
 
 
-bool test14()
+BOOST_AUTO_TEST_CASE(test14)
 {
 	std::cout << "Test 14 - BitFileWriter write 1 666 times into memory, then use BitFileReader to read it back." << std::endl;
 
@@ -544,12 +537,12 @@ bool test14()
 
 	}
 
-	return success;
+	BOOST_CHECK(success);
 }
 
 #define ADJUST(n) (n-256+Lzw::FirstCode) 
 
-bool test15()
+BOOST_AUTO_TEST_CASE(test15)
 {
 	std::cout << "Test 15 - Compress LZW example strings from Mark Nelson" << std::endl;
 	
@@ -596,12 +589,12 @@ bool test15()
 	}
 
 
-	return success;
+	BOOST_CHECK(success);
 }
 
-bool test16()
+BOOST_AUTO_TEST_CASE(test16)
 {
-	std::cout << "Test 16 - BitFileReader Test that we return the correct number of bits read" << std::endl;
+	std::cout << "Test 16 - BitFileReader Test that we BOOST_CHECK( the correct number of bits read" << std::endl;
 
 	BitFileReader r("../testdata/hello.txt");
 	
@@ -617,10 +610,10 @@ bool test16()
 			success = false;
 		}
 	}
-	return success;
+	BOOST_CHECK(success);
 }
 
-bool test17()
+BOOST_AUTO_TEST_CASE(test17)
 {
 	std::cout << "Test 17 - Decompress LZW example strings from Mark Nelson" << std::endl;
 	
@@ -658,10 +651,10 @@ bool test17()
 		}	
 	}
 
-	return success;
+	BOOST_CHECK(success);
 }
 
-bool test18()
+BOOST_AUTO_TEST_CASE(test18)
 {
 	std::cout << "Test 18 - Compress Alice in Wonderland and Read it back" << std::endl;
 
@@ -694,10 +687,10 @@ bool test18()
 		}	
 	}
 
-	return success;
+	BOOST_CHECK(success);
 }
 
-bool test19()
+BOOST_AUTO_TEST_CASE(test19)
 {
 	std::cout << "Test 19 - Write null terminated string to a file." << std::endl;
 	std::string teststr = "testing12345";
@@ -715,10 +708,10 @@ bool test19()
 	success &= r.read(&readstr);
 
 	//M_DEBUGTRACE(" - read: " << readstr << " expecting: " << teststr);
-	return success && readstr == teststr;
+	BOOST_CHECK(success && readstr == teststr);
 }
 
-bool test20()
+BOOST_AUTO_TEST_CASE(test20)
 {
 	std::cout << "Test 20 - Write null terminated string to memory." << std::endl;
 	std::string teststr = "testing12345";
@@ -733,10 +726,10 @@ bool test20()
 	success &= r.read(&readstr);
 
 	//M_DEBUGTRACE(" - read: " << readstr << " expecting: " << teststr);
-	return success && readstr == teststr;
+	BOOST_CHECK(success && readstr == teststr);
 }
 
-bool test21()
+BOOST_AUTO_TEST_CASE(test21)
 {
 	std::cout << "Test 21 - Create an empty archive, write it and read it back" << std::endl;
 
@@ -752,10 +745,10 @@ bool test21()
 	auto a = Archive::load(r);
 
 	// check?
-	return a->contents().empty();
+	BOOST_CHECK( a->contents().empty());
 }
 
-bool test22()
+BOOST_AUTO_TEST_CASE(test22)
 {
 	static const char* kFile = "../testdata/string_archive.bin";
 	static const std::string recordName = "mystring.txt";
@@ -783,7 +776,7 @@ bool test22()
 		std::cout << "failed to find " << recordName << " in archive" << std::endl;
 		for(auto c:contents)
 			std::cout << c.filename << std::endl;
-		return false;		
+		BOOST_CHECK(false);		
 	}
 
 	// decode it.
@@ -791,7 +784,7 @@ bool test22()
 	if(!a->get(recordName,w))
 	{
 		std::cout << "get failed to get the file" << std::endl;
-		return false;		
+		BOOST_CHECK(false);		
 	}
 
 	// finally check it decoded correctly.
@@ -802,11 +795,11 @@ bool test22()
 		std::cout << "strings not the same: " << str << " vs " << testingStr << std::endl;
 	}
 	
-	return pass;
+	BOOST_CHECK(pass);
 }
 
 
-bool test23()
+BOOST_AUTO_TEST_CASE(test23)
 {
 	static const char* kFile = "../testdata/alice_archive.bin";
 	static const std::string recordName = "alicec.txt";
@@ -834,7 +827,7 @@ bool test23()
 		std::cout << "failed to find " << recordName << " in archive" << std::endl;
 		for(auto c:contents)
 			std::cout << c.filename << std::endl;
-		return false;		
+		BOOST_CHECK(false);		
 	}
 
 	// decode it.
@@ -842,14 +835,14 @@ bool test23()
 	if(!a->get(recordName,w))
 	{
 		std::cout << "get failed to get the file" << std::endl;
-		return false;		
+		BOOST_CHECK(false);		
 	}
 
 	// finally check it decoded correctly.
-	return true;
+	BOOST_CHECK(true);
 }
 
-bool test24()
+BOOST_AUTO_TEST_CASE(test24)
 {
 	static const char* kFile = "../testdata/multi_archive.bin";
 	static const std::string recordName1 = "alice.txt";
@@ -892,14 +885,14 @@ bool test24()
 		std::cout << "failed to find " << recordName1 << " in archive" << std::endl;
 		for(auto c:contents)
 			std::cout << c.filename << std::endl;
-		return false;		
+		BOOST_CHECK(false);		
 	}
 	if(i2== contents.end())
 	{
 		std::cout << "failed to find " << recordName2 << " in archive" << std::endl;
 		for(auto c:contents)
 			std::cout << c.filename << std::endl;
-		return false;		
+		BOOST_CHECK(false);		
 	}
 
 	// decode them both.
@@ -907,21 +900,21 @@ bool test24()
 	if(!a->get(recordName1,w1))
 	{
 		std::cout << "get failed to get file1" << std::endl;
-		return false;		
+		BOOST_CHECK(false);		
 	}
 	
 	auto w2 = std::shared_ptr<BitWriter>(new BitFileWriter("../testdata/r2.txt"));
 	if(!a->get(recordName2,w2))
 	{
 		std::cout << "get failed to get file2" << std::endl;
-		return false;		
+		BOOST_CHECK(false);		
 	}
 
 	// finally check it decoded correctly.
-	return true;
+	BOOST_CHECK(true);
 }
 
-bool test25()
+BOOST_AUTO_TEST_CASE(test25)
 {
 	std::cout << "Test 25 - Seek and Tell test" << std::endl;
 	static const std::string testFile = "../testdata/seek_test.dat";
@@ -958,17 +951,17 @@ bool test25()
 			r->readBits(&word, 1);
 
 		if(!r->readBits(&word,1) || word != 1)
-			return false;
+			BOOST_CHECK(false);
 
 		r->seek(34);
 		if(r->readBits(&word,1)!=1 || word != 1)
-			return false;
+			BOOST_CHECK(false);
 		if(r->readBits(&word,1)!=1 || word != 0)
-			return false;
+			BOOST_CHECK(false);
 		if(!r->read<u32>(&word) || word != magic)
 		{
 			std::cout << "read " << std::hex << word << std::dec << std::endl;
-			return false;
+			BOOST_CHECK(false);
 		}
 
 		off = r->tell();
@@ -976,19 +969,19 @@ bool test25()
 		r->seek(off);
 		
 		if(r->readBits(&word,1)!=1 || word != 1)
-			return false;
+			BOOST_CHECK(false);
 		if(r->readBits(&word,1)!=1 || word != 0)
-			return false;
+			BOOST_CHECK(false);
 		if(!r->read(&word) || word != magic)
 		{
-			return false;
+			BOOST_CHECK(false);
 		}
 	}
 
-	return true;
+	BOOST_CHECK(true);
 }
 
-bool test26()
+BOOST_AUTO_TEST_CASE(test26)
 {
 	std::cout << "Test 26 - Reader File size test" << std::endl;
 	static const std::string testFile = "../testdata/alice.txt";
@@ -1008,10 +1001,10 @@ bool test26()
 	if(!pass)
 		std::cout << "failed, expecting " << 167517 << " read " << size << std::endl;
 
-	return pass;
+	BOOST_CHECK(pass);
 }
 
-bool test27()
+BOOST_AUTO_TEST_CASE(test27)
 {
 	std::cout << "Test 27 - Writer File size test" << std::endl;
 	static const char* kFile = "../testdata/size_writer.bin";
@@ -1033,55 +1026,9 @@ bool test27()
 	if(!pass)
 		std::cout << "string is " << testingStr.size() << ", calculated=" << size << std::endl;
 	
-	return pass;
+	BOOST_CHECK(pass);  // JUST TESTING!
 }
 
-#define RUNTEST(t) { bool pass = t(); pass ? std::cout << " pass." << std::endl : std::cout << " FAIL!" << std::endl; success = success && pass;  }
+BOOST_AUTO_TEST_SUITE_END()
 
-
-bool runTests()
-{
-	bool success = true;
-
-	try
-	{
-		RUNTEST(test1);
-		RUNTEST(test2);
-		RUNTEST(test3);
-		RUNTEST(test4);
-		RUNTEST(test5);
-		RUNTEST(test6);
-		RUNTEST(test7);
-		RUNTEST(test8);
-		RUNTEST(test9);
-		RUNTEST(test10);
-		RUNTEST(test11);
-		RUNTEST(test12);
-		RUNTEST(test13);
-		RUNTEST(test14);
-		RUNTEST(test15);
-		RUNTEST(test16);
-		RUNTEST(test17);
-		RUNTEST(test18);
-		RUNTEST(test19);
-		RUNTEST(test20);
-		RUNTEST(test21);
-		RUNTEST(test22);
-		RUNTEST(test23);
-		RUNTEST(test24);
-		RUNTEST(test25);
-		RUNTEST(test26);
-		RUNTEST(test27);
-	}
-	catch (std::bad_alloc* e)
-	{
-		std::cout << "Memory exception thrown." << e->what() << std::endl;
-	}
-	catch (std::exception* e)
-	{
-		std::cout << "General exception thrown: " << e->what() << std::endl;
-	}
-	
-	return success;
-}
 

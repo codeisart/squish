@@ -1,6 +1,7 @@
 #ifndef D_LZW_H
 #define D_LZW_H
 
+#include "config.h"
 #include "BasicTypes.h"
 #include "CompilerExtras.h"
 #include "Codec.h"

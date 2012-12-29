@@ -1,3 +1,4 @@
+#include "config.h"
 #include "BitIO.h"
 #include "Lzw.h"
 #include "DebugLog.h"

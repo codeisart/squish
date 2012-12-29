@@ -1,6 +1,7 @@
 #ifndef D_BITIO_H
 #define D_BITIO_H
 
+#include "config.h"
 #include <sstream>
 #include <fstream>
 #include <string>
