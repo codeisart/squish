@@ -1,6 +1,7 @@
 #include "config.h"
 #include "BitIO.h"
 #include "Lzw.h"
+#include "LzwFast.h"
 #include "DebugLog.h"
 #include "BasicTypes.h"
 #include <memory>
@@ -74,7 +75,7 @@ private:
 
 		// TODO: use factory to create correct codec, here.
 		// hardcode for now to use Lzw, which is our only codec.
-		record.codec = std::shared_ptr<Codec>(new Lzw());
+		record.codec = std::shared_ptr<Codec>(new LzwFast());
 		
 		if(!r->read(&record.filename))
 		{
@@ -207,7 +208,7 @@ public:
 				
 		// Write blank record.
 		Record r;
-		r.codec 	= std::shared_ptr<Codec>(new Lzw());
+		r.codec 	= std::shared_ptr<Codec>(new LzwFast());
 		r.filename 	= filename;
 		writeRecord(m_writer.get(),r);
 

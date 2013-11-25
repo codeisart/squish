@@ -1,6 +1,8 @@
 #ifndef D_BASIC_TYPES
 #define D_BASIC_TYPES
 
+#include <stdint.h>
+
 typedef unsigned long u64;
 typedef signed long s64;
 typedef unsigned int u32;

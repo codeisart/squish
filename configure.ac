@@ -40,6 +40,24 @@ AC_CACHE_SAVE
 AM_LDFLAGS="$AM_LDFLAGS -static-libgcc"
 
 ##########################################################################
+# profile compilation support
+##########################################################################
+
+AC_MSG_CHECKING([whether to build with debug information])
+AC_ARG_ENABLE([profile],
+    [AS_HELP_STRING([--enable-profile],
+        [enable profiling data generation (def=no)])],
+    [profileit="$enableval"],
+    [profileit=no])
+AC_MSG_RESULT([$profileit])
+
+if test x"$profileit" = x"yes"; then
+    AC_DEFINE([PROFILE],[],[Profile Mode])
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -pg -O2 -lc"
+fi
+
+##########################################################################
+##########################################################################
 # debug compilation support
 ##########################################################################
 

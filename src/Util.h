@@ -1,6 +1,8 @@
 #ifndef D_UTIL_H
 #define D_UTIL_H
 
+#define SIZEOF_ARRAY(a) (sizeof(a) / sizeof(a[0]))
+
 template<typename T>
 T max(const T a, const T b) 
 {

@@ -5,7 +5,7 @@
 #include "BasicTypes.h"
 #include "BitIO.h"
 #include "Codec.h"
-#include "Lzw.h"
+#include "LzwFast.h"
 #include "DebugLog.h"
 #include "Archive.h"
 
@@ -18,6 +18,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(SquishTests)
+
 
 BOOST_AUTO_TEST_CASE(test1)
 {
@@ -540,7 +541,7 @@ BOOST_AUTO_TEST_CASE(test14)
 	BOOST_CHECK(success);
 }
 
-#define ADJUST(n) (n-256+Lzw::FirstCode) 
+#define ADJUST(n) (n-256+LzwFast::FirstCode) 
 
 BOOST_AUTO_TEST_CASE(test15)
 {
@@ -551,18 +552,18 @@ BOOST_AUTO_TEST_CASE(test15)
 	const char* text_str = "/WED/WE/WEE/WEB/WET";
 	const std::string text(text_str,strlen(text_str));
 	
-	u32 expectedOut[] = { '/','W','E','D',ADJUST(256),'E',ADJUST(260),ADJUST(261),ADJUST(257),'B',ADJUST(260),'T', Lzw::EndOfData };
+	u32 expectedOut[] = { '/','W','E','D',ADJUST(256),'E',ADJUST(260),ADJUST(261),ADJUST(257),'B',ADJUST(260),'T', LzwFast::EndOfData };
 	//size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
 	
 	{
-		Codec* codec = new Lzw();
+		Codec* codec = new LzwFast();
 		BitStringReader r(text);
-		BitFileWriter w("../testdata/Lzw.out");
+		BitFileWriter w("../testdata/LzwFast.out");
 		codec->encode(&r,&w);
 		delete codec;
 	}
 
-	BitFileReader r("../testdata/Lzw.out");
+	BitFileReader r("../testdata/LzwFast.out");
 	u32 word = 0;
 	int expectedIndex = 0;
 	while( int bitsRead = r.readBits(&word,12) )
@@ -583,7 +584,7 @@ BOOST_AUTO_TEST_CASE(test15)
 				" at index " << expectedIndex << std::endl;	
 			success = false;
 		}
-		if( expectedOut[expectedIndex] == Lzw::EndOfData )
+		if( expectedOut[expectedIndex] == LzwFast::EndOfData )
 			break;
 		expectedIndex++;
 	}
@@ -594,7 +595,7 @@ BOOST_AUTO_TEST_CASE(test15)
 
 BOOST_AUTO_TEST_CASE(test16)
 {
-	std::cout << "Test 16 - BitFileReader Test that we BOOST_CHECK( the correct number of bits read" << std::endl;
+	std::cout << "Test 16 - BitFileReader Test that we check the correct number of bits read" << std::endl;
 
 	BitFileReader r("../testdata/hello.txt");
 	
@@ -624,23 +625,23 @@ BOOST_AUTO_TEST_CASE(test17)
 	//size_t expectedSize = sizeof(expectedOut) / sizeof(u32);
 	
 	{
-		Codec* codec = new Lzw();
+		Codec* codec = new LzwFast();
 		BitStringReader r(text);
-		BitFileWriter w("../testdata/Lzw.out");
+		BitFileWriter w("../testdata/LzwFast.out");
 		codec->encode(&r,&w);
 		delete codec;
 	}
 
 
 	{
-		Codec* codec = new Lzw();
-		BitFileReader r("../testdata/Lzw.out");
-		BitFileWriter w("../testdata/Lzw.txt");
+		Codec* codec = new LzwFast();
+		BitFileReader r("../testdata/LzwFast.out");
+		BitFileWriter w("../testdata/LzwFast.txt");
 		codec->decode(&r,&w);
 		delete codec;
 	}
 	{
-		BitFileReader r("../testdata/Lzw.txt");
+		BitFileReader r("../testdata/LzwFast.txt");
 		char c;
 		int i = 0;
 		while(r.readBits(&c,8))
@@ -659,7 +660,7 @@ BOOST_AUTO_TEST_CASE(test18)
 	std::cout << "Test 18 - Compress Alice in Wonderland and Read it back" << std::endl;
 
 	int success = true;	
-	std::unique_ptr<Codec> codec(new Lzw());
+	std::unique_ptr<Codec> codec(new LzwFast());
 	{
 		BitFileReader r("../testdata/alice.txt");
 		BitFileWriter w("../testdata/alice.out");

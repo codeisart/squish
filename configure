@@ -721,6 +721,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_dependency_tracking
+enable_profile
 enable_debug
 with_boost
 with_boost_libdir
@@ -1356,6 +1357,7 @@ Optional Features:
                           do not reject slow dependency extractors
   --disable-dependency-tracking
                           speeds up one-time build
+  --enable-profile        enable profiling data generation (def=no)
   --enable-debug          enable debug data generation (def=no)
 
 Optional Packages:
@@ -4815,6 +4817,30 @@ rm -f confcache
 # Link statically stdlib.
 AM_LDFLAGS="$AM_LDFLAGS -static-libgcc"
 
+##########################################################################
+# profile compilation support
+##########################################################################
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build with debug information" >&5
+$as_echo_n "checking whether to build with debug information... " >&6; }
+# Check whether --enable-profile was given.
+if test "${enable_profile+set}" = set; then :
+  enableval=$enable_profile; profileit="$enableval"
+else
+  profileit=no
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $profileit" >&5
+$as_echo "$profileit" >&6; }
+
+if test x"$profileit" = x"yes"; then
+
+$as_echo "#define PROFILE /**/" >>confdefs.h
+
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -pg -O2 -lc"
+fi
+
+##########################################################################
 ##########################################################################
 # debug compilation support
 ##########################################################################
