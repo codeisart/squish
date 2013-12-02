@@ -1,6 +1,6 @@
 #include "config.h"
 #include "BitIO.h"
-#include "Lzw.h"
+//#include "Lzw.h"
 #include "LzwFast.h"
 #include "DebugLog.h"
 #include "BasicTypes.h"

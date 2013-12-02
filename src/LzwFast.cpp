@@ -1,12 +1,32 @@
 #include "LzwFast.h"
 #include "BitIO.h"
-#include <Primes.h>
 
 #include <string>
 #include <iostream>
 #include <unordered_map>
 #include <assert.h>
 #include <cmath>
+
+std::pair<int, u64> g_tableSizes[] =
+{
+	std::pair<int,u64>(9 ,641),
+	std::pair<int,u64>(10 ,1283),
+	std::pair<int,u64>(11 ,2579),
+	std::pair<int,u64>(12 ,5147),
+	std::pair<int,u64>(13 ,10243),
+	std::pair<int,u64>(14 ,20483),
+	std::pair<int,u64>(15 ,40961),
+	std::pair<int,u64>(16 ,81929),
+	std::pair<int,u64>(17 ,163841),
+	std::pair<int,u64>(18 ,327689),
+	std::pair<int,u64>(19 ,655373),
+	std::pair<int,u64>(20 ,1310723),
+	std::pair<int,u64>(21 ,2621447),
+	std::pair<int,u64>(22 ,5242883),
+	std::pair<int,u64>(23 ,10485767),
+	std::pair<int,u64>(24 ,20971529),
+};
+static const int g_nTableSizes = SIZEOF_ARRAY(g_tableSizes);
 
 struct LzwFast::D
 {
@@ -42,25 +62,23 @@ void LzwFast::reset()
 
 void LzwFast::buildTable(int codeSize)
 {
-	static const float kExtraSpace = 1.25f; // 25% extra space in table.
-
 	//std::cout << "buildTable " << codeSize << std::endl;
 	
 	// Backup these.
 	int oldSize = m_tableSize;
 	D* oldTable = m_table;
-
-	// Code size dictates table size.
-	m_tableSize = (1 << codeSize);
 	
-	//std::cout << "table size to match code size " << m_tableSize << std::endl;
+	// Find the correct table size for this code size.
+	for( int i= 0; i < g_nTableSizes; ++i )
+	{
+		if( g_tableSizes[i].first == codeSize )
+		{
+			m_tableSize = g_tableSizes[i].second;
+			break;	
+		}
+	}
 	
-	m_tableSize = (int)(ceil( (float)m_tableSize * kExtraSpace ));
-	
-	//std::cout << "table size before rounding up to prime " << m_tableSize << std::endl;
-	
-	// Round up to nearest prime number.
-	m_tableSize = Primes::findGreaterThan(m_tableSize);
+	assert( tableSize != m_tableSize && "Failed to grow table." );
 
 	// Make the new table.
 	m_table = new D[m_tableSize];

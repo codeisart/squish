@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef D_LZWFAST_H
 #define D_LZWTAST_H
 
